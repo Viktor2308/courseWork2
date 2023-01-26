@@ -1,127 +1,99 @@
 package com.skypro.courseWorkDiary.task;
 
-import com.skypro.courseWorkDiary.repeatTask.Repeat;
+
+import com.skypro.courseWorkDiary.exeption.IncorrectArgumentException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-public class Task implements Repeat {
+public abstract class Task {
     private final int id;
-    private String name;
+    private String title;
     private String description;
-    private boolean workTask; //false - home
+    private Type type;
     private final LocalDateTime dateCreate;
-    private int typeRepeat; // 0 - one-time, 1 - daily, 2 - weekly, 3 - monthly, 4 - annual.
-    private final List<LocalDate> taskDateRepeat;
-    private boolean taskIsActive;
-    private static int count;
+    private static int count = 0;
 
-    public Task(String name, String description, int workTask, int typeRepeat) {
-        count++;
+    public Task(String title, String description, String type) throws IncorrectArgumentException {
         this.id = count;
-        setName(name);
+        setTitle(title);
         setDescription(description);
-        setWorkTask(workTask);
+        setType(type);
         this.dateCreate = LocalDateTime.now();
-        setTypeRepeat(typeRepeat);
-        this.taskDateRepeat = new ArrayList<>();
-        Repeat.repeat(this.typeRepeat, taskDateRepeat);
-        this.taskIsActive = true;
+        count++;
     }
 
-    public String getName() {
-        return name;
+    public void setType(String type) throws IncorrectArgumentException {
+        if (type.equalsIgnoreCase("home")) {
+            this.type = Type.HOME;
+        } else if (type.equalsIgnoreCase("work")) {
+            this.type = Type.WORK;
+        } else {
+            throw new IncorrectArgumentException("No correct argument in Type task.");
+        }
+    }
+
+
+    public void setTitle(String title) throws IncorrectArgumentException {
+        if (!title.isEmpty()) {
+            this.title = title;
+        } else {
+            throw new IncorrectArgumentException("No correct argument in Title task.");
+        }
+    }
+
+    public void setDescription(String description) throws IncorrectArgumentException {
+        if (!description.isEmpty()) {
+            this.description = description;
+        } else {
+            throw new IncorrectArgumentException("No correct argument in Description task.");
+        }
     }
 
     public int getId() {
         return id;
     }
 
-    public void setName(String name) {
-        if (name.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect information in the name.");
-        } else {
-            this.name = name;
-        }
+    public String getTitle() {
+        return title;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        if (description.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect information in the description.");
-        } else {
-            this.description = description;
-        }
+    public Type getType() {
+        return type;
     }
 
-    public boolean isWorkTask() {
-        return workTask;
+    public LocalDateTime getDateCreate() {
+        return dateCreate;
     }
 
-    public void setWorkTask(int num) {
-        switch (num) {
-            case 0:
-                workTask = false;
-                break;
-            case 1:
-                workTask = true;
-                break;
-            default:
-                throw new IllegalArgumentException("Incorrect information in work task.");
-        }
-
-    }
-
-    public int getTypeRepeat() {
-        return typeRepeat;
-    }
-
-    public void setTypeRepeat(int typeRepeat) {
-        if (typeRepeat < 0 || typeRepeat > 4) {
-            throw new IllegalArgumentException("Incorrect information in the type repeat.");
-        } else {
-            this.typeRepeat = typeRepeat;
-        }
-    }
-
-    public List<LocalDate> getTaskDateRepeat() {
-        return taskDateRepeat;
-    }
-
-    public boolean isTaskIsActive() {
-        return taskIsActive;
-    }
-
-    public void setTaskIsActive(boolean taskIsActive) {
-        this.taskIsActive = taskIsActive;
-    }
+    public abstract boolean appearsIn(LocalDate date);
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description) && Objects.equals(dateCreate, task.dateCreate);
+        return id == task.id && Objects.equals(title, task.title) && Objects.equals(description, task.description) && type == task.type && Objects.equals(dateCreate, task.dateCreate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, dateCreate);
+        return Objects.hash(id, title, description, type, dateCreate);
     }
 
     @Override
     public String toString() {
-        return "Id " + id +
-                ", name " + name +
-                ", description " + description +
-                ", date create " + dateCreate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+        return "id " + id +
+                ", " + type +
+                ", " + title +
+                ", " + description +
+                ", " + dateCreate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
     }
 }

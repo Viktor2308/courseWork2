@@ -1,66 +1,53 @@
 package com.skypro.courseWorkDiary.serviceTask;
 
+import com.skypro.courseWorkDiary.exeption.TaskNotFoundException;
 import com.skypro.courseWorkDiary.task.Task;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 
-public abstract class ServiceTask {
+import java.time.LocalDate;
+import java.util.*;
+
+public class ServiceTask {
+    private ServiceTask() {
+    }
+
     private static final HashMap<Integer, Task> taskHashMap = new HashMap<>();
+    private static final List<Task> delTaskArrayList = new ArrayList<>();
 
     public static void addTaskMap(Task task) {
         taskHashMap.put(task.getId(), task);
     }
 
-    public static void getTasksForDay(int year, int month, int day) {
-        if (year > 2022 && year < 2123 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-            LocalDate date = LocalDate.of(year, month, day);
-            for (Task task : taskHashMap.values()) {
-                if (!task.getTaskDateRepeat().isEmpty() && task.getTaskDateRepeat().contains(date) && task.isTaskIsActive()) {
-                    System.out.println(task);
-                }
-            }
+
+    public static void delTask(int id) {
+        if (taskHashMap.containsKey(id)) {
+            delTaskArrayList.add(taskHashMap.get(id));
+            taskHashMap.remove(id);
         } else {
-            System.out.println("Date enter not correct");
+            System.out.println("Task with this id was not found.");
         }
     }
 
-
-    public static void dellTask(int id) {
-        if (id > 0) {
-            for (int key : taskHashMap.keySet()) {
-                if (id == key) {
-                    taskHashMap.get(key).setTaskIsActive(false);
-                    System.out.println("Task " + taskHashMap.get(key).getName() + " deleted.");
-                    return;
-                }
-            }
-            System.out.println("Task with this id was not found");
-        } else {
-            System.out.println("Id is not correct.");
+    public static ArrayList<Task> getAllByDay(LocalDate localDate) throws TaskNotFoundException {
+        ArrayList<Task> taskArrayList = new ArrayList<>();
+        for (Task task : taskHashMap.values()) {
+            if (task.appearsIn(localDate))
+                taskArrayList.add(task);
         }
+        if (!taskArrayList.isEmpty()) {
+            return taskArrayList;
+        } else {
+            System.out.println("No Task in this date.");
+            return null;
+        }
+
     }
 
     public static void printAllDellTask() {
-        for (Task task : taskHashMap.values()) {
-            if (!task.isTaskIsActive()) {
-                System.out.println(task);
-            }
+        for (Task task : delTaskArrayList) {
+            System.out.println(task);
         }
-
     }
 
-//    public static void printAllDellTask(int year, int month, int day) {
-//        if (year > 2022 && year < 2123 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-//            LocalDate date = LocalDate.of(year, month, day);
-//            for (Task task : taskHashMap.values()) {
-//                if (!task.isTaskIsActive() && task.getTaskDateRepeat().contains(date)) {
-//                    System.out.println(task);
-//                }
-//            }
-//        } else {
-//            System.out.println("Date enter not correct");
-//        }
-//    }
 
 }
